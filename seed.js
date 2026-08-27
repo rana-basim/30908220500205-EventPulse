@@ -1,81 +1,75 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const Order = require('./models/orderschema');
-const Product = require ('./models/productschema');
-const Category = require('./models/categoryschema');
-dotenv.config();
+const bcrypt = require('bcryptjs');
+require('dotenv').config();
 
+const user = require('./models/user');
+const category = require('./models/category');
+const event = require('./models/event');
 
-
-connectDB()
-
-const seedDB = async () => {
-
+const seeddatabase = async () => {
   try {
-    await connectDB();
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('connected to database for seeding...');
 
+    // 1. Seed Admin User
+    const existingadmin = await user.findOne({ email: 'admin@eventpulse.com' });
+    let adminuser = existingadmin;
 
-    // Cleanup in correct order
-
-    await Order.deleteMany({});
-    await Product.deleteMany({});
-    await Category.deleteMany({});
-
-    // Sample categories
-    const categories = await Category.insertMany([
-      { name: 'device', description: 'Electronic gadgets' },
-      { name: 'components', description: 'Internal parts of a computer' },
-      { name: 'accessories', description: 'Things you add' },
-    ]);
-
-    // Map categories for reference
-    const [device, components, accessories] = categories;
-
-    // Sample products
-    const products = [
-      {
-        name: "tablet",
-    price: 15000,
-    category: device._id
-
-    },
-    {
-     name: "phone",
-     price: 5000,
-     category: device._id
-   },
-   {
-     name: "computer",
-    price: 21000,
-      category: device._id
-   },
-    {
-     name: "GPU",
-     price: 25000,
-     category: components._id
-   },
-    {
-      name: "RAM",
-      price: 1000,
-      category: components._id
-    },
-    {
-     name: "mouse",
-     price: 140,
-     category: accessories._id
+    if (!existingadmin) {
+      const hashedpassword = await bcrypt.hash('admin123', 10);
+      adminuser = await user.create({
+        name: 'system admin',
+        email: 'admin@eventpulse.com',
+        password: hashedpassword,
+        role: 'admin',
+      });
+      console.log('admin user created');
+    } else {
+      console.log('admin user already exists');
     }
-     ];
 
-    await Product.insertMany(products);
+    // 2. Seed Categories
+    const samplecategories = [
+      { name: 'tech', description: 'technology workshops and summits' },
+      { name: 'music', description: 'live music performances and festivals' },
+      { name: 'sports', description: 'tournaments and fitness events' },
+    ];
 
-    console.log(`Seeded ${categories.length} categories and ${products.length} products`);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    mongoose.disconnect();
+    for (const cat of samplecategories) {
+      await category.findOneAndUpdate(
+        { name: cat.name },
+        cat,
+        { upsert: true, new: true }
+      );
+    }
+    console.log('categories seeded');
+
+    const techcategory = await category.findOne({ name: 'tech' });
+
+    // 3. Seed Sample Event
+    const sampleevent = {
+      title: 'egypt tech summit 2026',
+      description: 'annual backend software engineering conference',
+      date: new Date('2026-11-15'),
+      city: 'cairo',
+      capacity: 100,
+      category: techcategory._id,
+      createdBy: adminuser._id,
+    };
+
+    await event.findOneAndUpdate(
+      { title: sampleevent.title },
+      sampleevent,
+      { upsert: true, new: true }
+    );
+    console.log('sample event seeded');
+
+    console.log('seeding completed successfully without duplication');
+    process.exit(0);
+  } catch (error) {
+    console.error(`seeding error: ${error.message}`);
+    process.exit(1);
   }
 };
 
-seedDB();
-
+seeddatabase();

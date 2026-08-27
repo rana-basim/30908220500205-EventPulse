@@ -5,7 +5,7 @@ const AppError = require('../utils/apperror');
 const asyncHandler = require('../utils/asyncHandler');
 
 // 2. Central Error Handler Middleware
-const globalErrorHandler = (err, req, res, next) => {
+const globalerrorhandler = (err, req, res, next) => {
   // Create mutable copies of status code and message
   let statusCode = err.statusCode || 500;
   let status = err.status || 'error';
@@ -36,6 +36,22 @@ const globalErrorHandler = (err, req, res, next) => {
     message = `Duplicate field value: "${err.keyValue[fieldName]}". Please use another value!`;
   }
 
+  // --- Handle Auth / JWT Errors ---
+
+  // Invalid / Tampered JWT Token
+  if (err.name === 'JsonWebTokenError') {
+    statusCode = 401;
+    status = 'fail';
+    message = 'Invalid token. Please log in again!';
+  }
+
+  // Expired JWT Token
+  if (err.name === 'TokenExpiredError') {
+    statusCode = 401;
+    status = 'fail';
+    message = 'Your token has expired! Please log in again.';
+  }
+
   // --- Send Response ---
   res.status(statusCode).json({
     status: status,
@@ -45,4 +61,4 @@ const globalErrorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = { asyncHandler, globalErrorHandler };
+module.exports = globalerrorhandler;

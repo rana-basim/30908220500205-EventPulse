@@ -1,59 +1,61 @@
 const express = require('express');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db.js');
-const errorHandler = require('./middleware/errorhandler');
-const mongoSanitize = require('express-mongo-sanitize');
-const { globalErrorHandler, AppError } = require('./middleware/errorhandler.js');
-const categoriesroutes = require('./routes/categoriesroutes');
-const productroutes = require('./routes/productroutes');
-const cartroutes = require('./routes/cartroutes');
-const orderroutes = require('./routes/orderroutes');
-const app = express()
+const cors = require('cors');
+const apperror = require('./utils/apperror');
+const errormiddleware = require('./middleware/errorhandler');
 
-// Load environment config
-dotenv.config();
+// Import routes
+const userroutes = require('./routes/user');
+const categoryroutes = require('./routes/category');
+const eventroutes = require('./routes/event');
+const registrationroutes = require('./routes/registration');
+const messageroutes = require('./routes/message');
 
-// Connect to MongoDB Database
-connectDB();
+const app = express();
 
-app.use((req, res, next) => {
-    Object.defineProperty(req, 'query', {
-        ...Object.getOwnPropertyDescriptor(req, 'query'),
-        value: req.query,
-        writable: true,
-    });
-    next();
-});
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
 
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'EventPulse API',
+      version: '1.0.0',
+      description: 'EventPulse Management Backend API Documentation',
+    },
+    servers: [
+      { url: 'http://localhost:5000' }
+    ],
+  },
+  apis: ['./routes/*.js'], // Reads annotations from your route files
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Global middleware
+app.use(cors());
 app.use(express.json());
-app.use(mongoSanitize());
 
+// API Routes
+app.use('/api/users', userroutes);
+app.use('/api/categories', categoryroutes);
+app.use('/api/events', eventroutes);
+app.use('/api/registrations', registrationroutes);
+app.use('/api/messages', messageroutes);
 
-//Routing
-app.use('/api/categories', categoriesroutes);
-app.use('/api/products', productroutes);
-app.use('/api/cart', cartroutes);
-app.use('/api/order', orderroutes);
-      
-
-
-
-//404
-
-app.use((req, res, next) => {
-  res.status(404).json({ status: 'fail', message: 'Not Found' });
-})
-
-
-const PORT = 3000; 
-
-app.get('/', (req, res) => {
-    res.send('Hello World! This is my text on localhost:3000.');
+// Task 7: Health Endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'server and database operational' });
 });
 
-app.use(globalErrorHandler);
+// Handle undefined routes
+app.all(/(.*)/, (req, res, next) => {
+  next(new apperror(`cannot find ${req.originalUrl} on this server`, 404));
+});
 
-app.listen(PORT, () => console.log(`Running on http://localhost:${PORT}`));
+// Task 6: Central Error Handling Middleware
+app.use(errormiddleware);
 
 
-
+module.exports = app;
