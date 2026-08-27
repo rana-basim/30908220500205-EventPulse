@@ -1,4 +1,5 @@
-# Student ID-EventPulse Backend API #
+# 30908220500205-event
+ Backend API #
 
 ## TITLE AND DESCRIPTION
 This is an Event Management Backend API. You can manage user authentication (attendees and admins), create and filter events, handle event registrations with strict capacity limits, broadcast real-time announcements via Socket.io, view automated message history, and inspect interactive Swagger documentation. 
