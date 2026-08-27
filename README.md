@@ -1,4 +1,3 @@
-[!CAUTION]
 # I submitted the wrong vercel deployment link. The right one is: "https://30908220500205-event.vercel.app/". The link I sent you was for the dashboard which only i can access.
 # 30908220500205-event
  Backend API #
