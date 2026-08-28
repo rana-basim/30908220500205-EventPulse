@@ -1,5 +1,9 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
+
 const apperror = require('./utils/apperror');
 const errormiddleware = require('./middleware/errorhandler');
 
@@ -11,9 +15,6 @@ const registrationroutes = require('./routes/registration');
 const messageroutes = require('./routes/message');
 
 const app = express();
-
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsDoc = require('swagger-jsdoc');
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -27,7 +28,7 @@ const swaggerOptions = {
       { url: 'http://localhost:5000' }
     ],
   },
-  apis: ['./routes/*.js'], // Reads annotations from your route files
+  apis: [], // Left empty to prevent Vercel file-system deployment crash
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -44,9 +45,23 @@ app.use('/api/events', eventroutes);
 app.use('/api/registrations', registrationroutes);
 app.use('/api/messages', messageroutes);
 
-// Task 7: Health Endpoint
+// Task 7: Health Endpoint (confirms the server + the state of the database)
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'server and database operational' });
+  const isdbconnected = mongoose.connection.readyState === 1;
+
+  if (!isdbconnected) {
+    return res.status(503).json({
+      status: 'error',
+      message: 'database connection not ready',
+      database: 'disconnected',
+    });
+  }
+
+  return res.status(200).json({
+    status: 'ok',
+    message: 'server and database operational',
+    database: 'connected',
+  });
 });
 
 // Handle undefined routes
@@ -56,6 +71,5 @@ app.all(/(.*)/, (req, res, next) => {
 
 // Task 6: Central Error Handling Middleware
 app.use(errormiddleware);
-
 
 module.exports = app;
