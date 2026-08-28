@@ -6,34 +6,51 @@ require('dotenv').config();
 const app = require('./app');
 const initsocket = require('./services/socketservice');
 
-// Create HTTP server wrapping Express app
-const server = http.createServer(app);
-
-// Initialize Socket.io attached to HTTP server
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-
-// Wire Socket.io event logic
-initsocket(io);
-
-// Database Connection & Server Startup
-// Fixed: Check both UPPERCASE and lowercase env variables to prevent undefined errors
+// Resolve Environment Variables safely
 const port = process.env.PORT || process.env.port || 5000;
 const mongouri = process.env.MONGO_URI || process.env.mongo_uri;
 
-mongoose
-  .connect(mongouri)
-  .then(() => {
-    console.log('mongodb atlas connected successfully');
-    server.listen(port, () => {
-      console.log(`server running on port ${port}`);
-    });
-  })
-  .catch((error) => {
+// Prevent Vercel boot crashes
+let isconnected = false;
+const connectdb = async () => {
+  if (isconnected && mongoose.connection.readyState === 1) return;
+  if (!mongouri) {
+    console.error('MONGO_URI is missing from Environment Variables!');
+    return;
+  }
+  try {
+    await mongoose.connect(mongouri);
+    isconnected = true;
+    console.log('mongodb connected successfully');
+  } catch (error) {
     console.error('database connection failure:', error.message);
-    process.exit(1);
+  }
+};
+
+// Middleware to ensure DB connection per request on serverless
+app.use(async (req, res, next) => {
+  await connectdb();
+  next();
+});
+
+// VERCEL ENVIRONMENT: Export Express app directly (NO server.listen)
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  // LOCAL ENVIRONMENT: Create HTTP Server & Socket.io
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
   });
+
+  initsocket(io);
+
+  connectdb().then(() => {
+    server.listen(port, () => {
+      console.log(`local server running on port ${port}`);
+    });
+  });
+}
