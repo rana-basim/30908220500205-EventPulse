@@ -1,4 +1,4 @@
-# I submitted the wrong vercel deployment link. The right one is: "https://30908220500205-event.vercel.app/". The link I sent you was for an old version
+# I submitted the wrong vercel deployment link. The right one is: "https://30908220500205-event.vercel.app/". The link I sent you was wrong
 # 30908220500205-event
  Backend API #
 
