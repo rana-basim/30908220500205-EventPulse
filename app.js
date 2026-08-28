@@ -15,26 +15,42 @@ const registrationroutes = require('./routes/registration');
 const messageroutes = require('./routes/message');
 
 const app = express();
-
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'EventPulse API',
-      version: '1.0.0',
-      description: 'EventPulse Management Backend API Documentation',
-    },
-    servers: [
-      { url: '/' } // Using root path keeps Swagger working on both local and Vercel environments
-    ],
+// Static
+const swaggerSpec = {
+  openapi: '3.0.0',
+  info: {
+    title: 'EventPulse API',
+    version: '1.0.0',
+    description: 'EventPulse Management Backend API Documentation',
   },
-  apis: [
-    './routes/user.js',
-    './routes/category.js',
-    './routes/event.js',
-    './routes/registration.js',
-    './routes/message.js'
-  ],
+  servers: [{ url: '/' }],
+  paths: {
+    '/health': {
+      get: {
+        summary: 'Health check endpoint',
+        responses: {
+          200: { description: 'Server and database operational' },
+          503: { description: 'Database disconnected' }
+        }
+      }
+    },
+    '/api/users': {
+      get: { summary: 'User routes endpoint' },
+      post: { summary: 'User actions endpoint' }
+    },
+    '/api/categories': {
+      get: { summary: 'Category routes endpoint' }
+    },
+    '/api/events': {
+      get: { summary: 'Event list endpoint' }
+    },
+    '/api/registrations': {
+      get: { summary: 'Registrations endpoint' }
+    },
+    '/api/messages': {
+      get: { summary: 'Messages endpoint' }
+    }
+  }
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
