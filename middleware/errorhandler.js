@@ -2,7 +2,7 @@
 const AppError = require('../utils/apperror');
 
 // 1. Async Handler Wrapper
-const asyncHandler = require('../utils/asyncHandler');
+const asyncHandler = require('../utils/asynchandler');
 
 // 2. Central Error Handler Middleware
 const globalerrorhandler = (err, req, res, next) => {
