@@ -25,10 +25,16 @@ const swaggerOptions = {
       description: 'EventPulse Management Backend API Documentation',
     },
     servers: [
-      { url: 'http://localhost:5000' }
+      { url: '/' } // Using root path keeps Swagger working on both local and Vercel environments
     ],
   },
-  apis: [], // Left empty to prevent Vercel file-system deployment crash
+  apis: [
+    './routes/user.js',
+    './routes/category.js',
+    './routes/event.js',
+    './routes/registration.js',
+    './routes/message.js'
+  ],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
