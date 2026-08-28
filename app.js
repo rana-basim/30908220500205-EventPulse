@@ -14,7 +14,6 @@ const eventroutes = require('./routes/event');
 const registrationroutes = require('./routes/registration');
 const messageroutes = require('./routes/message');
 
-const app = express();
 // Static
 const swaggerSpec = {
   openapi: '3.0.0',
@@ -52,6 +51,8 @@ const swaggerSpec = {
     }
   }
 };
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
