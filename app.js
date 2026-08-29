@@ -25,6 +25,7 @@ const swaggerOptions = {
       description: 'EventPulse Management Backend API Documentation',
     },
     servers: [
+      { url: '/' },
       { url: 'http://localhost:5000' }
     ],
   },
