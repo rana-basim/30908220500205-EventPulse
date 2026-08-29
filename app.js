@@ -28,7 +28,7 @@ const swaggerOptions = {
       { url: 'http://localhost:5000' }
     ],
   },
-  apis: [], // Left empty to prevent Vercel file-system deployment crash
+ apis: ['./routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
