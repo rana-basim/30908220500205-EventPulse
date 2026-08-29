@@ -16,6 +16,15 @@ const messageroutes = require('./routes/message');
 
 const app = express();
 
+const path = require('path');
+
+// CDN links to serve Swagger assets properly on Vercel
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css";
+const JS_URL = [
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js"
+];
+
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
@@ -29,11 +38,28 @@ const swaggerOptions = {
       { url: 'http://localhost:5000' }
     ],
   },
- apis: ['./routes/*.js'],
+  // Crucial: Use path.join so Vercel resolves route paths in production
+  apis: [path.join(__dirname, './routes/*.js')],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// 1. Expose raw spec JSON endpoint
+app.get('/api-docs-json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocs);
+});
+
+// 2. Setup UI with explicit CDN options & JSON URL
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocs, {
+    swaggerUrl: '/api-docs-json',
+    customCssUrl: CSS_URL,
+    customJs: JS_URL
+  })
+);
 
 // Global middleware
 app.use(cors());
