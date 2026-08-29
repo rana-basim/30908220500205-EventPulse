@@ -37,3 +37,4 @@ mongoose
     console.error('database connection failure:', error.message);
     process.exit(1);
   });
+module.exports = app;
