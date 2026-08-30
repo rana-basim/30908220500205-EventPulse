@@ -86,21 +86,29 @@ app.use('/api/messages', messageroutes);
 app.get('/health', async (req, res) => {
   try {
     await connectDB();
-  const isdbconnected = mongoose.connection.readyState === 1;
+    const isdbconnected = mongoose.connection.readyState === 1;
 
-  if (!isdbconnected) {
-    return res.status(503).json({
+    if (!isdbconnected) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'database connection not ready',
+        database: 'disconnected',
+      });
+    }
+
+    return res.status(200).json({
+      status: 'ok',
+      message: 'server and database operational',
+      database: 'connected',
+    });
+  } catch (error) {
+    // Return the actual error message here to debug Vercel logs
+    return res.status(500).json({
       status: 'error',
-      message: 'database connection not ready',
+      message: error.message || 'Connection failed',
       database: 'disconnected',
     });
   }
-
-  return res.status(200).json({
-    status: 'ok',
-    message: 'server and database operational',
-    database: 'connected',
-  });
 });
 
 // Handle undefined routes
