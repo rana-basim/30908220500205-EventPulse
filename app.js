@@ -5,7 +5,6 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
 
 const apperror = require('./utils/apperror');
-const connectDB = require('./config/db');
 const errormiddleware = require('./middleware/errorhandler');
 
 // Import routes
@@ -66,15 +65,6 @@ app.use(
 app.use(cors());
 app.use(express.json());
 
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
 // API Routes
 app.use('/api/users', userroutes);
 app.use('/api/categories', categoryroutes);
@@ -83,32 +73,22 @@ app.use('/api/registrations', registrationroutes);
 app.use('/api/messages', messageroutes);
 
 // Task 7: Health Endpoint (confirms the server + the state of the database)
-app.get('/health', async (req, res) => {
-  try {
-    await connectDB();
-    const isdbconnected = mongoose.connection.readyState === 1;
+app.get('/health', (req, res) => {
+  const isdbconnected = mongoose.connection.readyState === 1;
 
-    if (!isdbconnected) {
-      return res.status(503).json({
-        status: 'error',
-        message: 'database connection not ready',
-        database: 'disconnected',
-      });
-    }
-
-    return res.status(200).json({
-      status: 'ok',
-      message: 'server and database operational',
-      database: 'connected',
-    });
-  } catch (error) {
-    // Return the actual error message here to debug Vercel logs
-    return res.status(500).json({
+  if (!isdbconnected) {
+    return res.status(503).json({
       status: 'error',
-      message: error.message || 'Connection failed',
+      message: 'database connection not ready',
       database: 'disconnected',
     });
   }
+
+  return res.status(200).json({
+    status: 'ok',
+    message: 'server and database operational',
+    database: 'connected',
+  });
 });
 
 // Handle undefined routes
