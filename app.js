@@ -6,6 +6,7 @@ const swaggerJsDoc = require('swagger-jsdoc');
 
 const apperror = require('./utils/apperror');
 const errormiddleware = require('./middleware/errorhandler');
+const connectDB = require('./config/db');
 
 // Import routes
 const userroutes = require('./routes/user');
@@ -64,6 +65,15 @@ app.use(
 // Global middleware
 app.use(cors());
 app.use(express.json());
+// Database Middleware
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 // API Routes
 app.use('/api/users', userroutes);
@@ -73,22 +83,27 @@ app.use('/api/registrations', registrationroutes);
 app.use('/api/messages', messageroutes);
 
 // Task 7: Health Endpoint (confirms the server + the state of the database)
-app.get('/health', (req, res) => {
-  const isdbconnected = mongoose.connection.readyState === 1;
 
-  if (!isdbconnected) {
-    return res.status(503).json({
+app.get('/health', async (req, res) => {
+  try {
+    // 1. Ensure DB connection promise is resolved
+    const db = await connectDB();
+    
+    // 2. Ping the database directly to confirm active connection
+    await db.connection.db.admin().ping();
+
+    return res.status(200).json({
+      status: 'ok',
+      message: 'server and database operational',
+      database: 'connected',
+    });
+  } catch (error) {
+    return res.status(500).json({
       status: 'error',
-      message: 'database connection not ready',
+      message: error.message,
       database: 'disconnected',
     });
   }
-
-  return res.status(200).json({
-    status: 'ok',
-    message: 'server and database operational',
-    database: 'connected',
-  });
 });
 
 // Handle undefined routes
