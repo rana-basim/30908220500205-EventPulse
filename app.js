@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
 
@@ -14,10 +15,9 @@ const categoryroutes = require('./routes/category');
 const eventroutes = require('./routes/event');
 const registrationroutes = require('./routes/registration');
 const messageroutes = require('./routes/message');
+const healthroutes = require('./routes/health'); // Ensure this import is declared
 
 const app = express();
-
-const path = require('path');
 
 // CDN links to serve Swagger assets properly on Vercel
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css";
@@ -39,8 +39,8 @@ const swaggerOptions = {
       { url: 'http://localhost:5000' }
     ],
   },
-  // Crucial: Use path.join so Vercel resolves route paths in production
-  apis: [path.join(__dirname, './routes/*.js')],
+  // Fix 1: Cross-platform slash normalization for Windows & Linux/Vercel
+  apis: [path.join(__dirname, 'routes', '*.js').replace(/\\/g, '/')],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -51,12 +51,12 @@ app.get('/api-docs-json', (req, res) => {
   res.send(swaggerDocs);
 });
 
-// 2. Setup UI with explicit CDN options & JSON URL
+// 2. Setup UI with explicit CDN options
 app.use(
   '/api-docs',
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocs, {
-    swaggerUrl: '/api-docs-json',
+    // Fix 2: Remove `swaggerUrl` to pass in-memory spec directly; add customCssUrl
     customCssUrl: CSS_URL,
     customJs: JS_URL
   })
@@ -65,6 +65,7 @@ app.use(
 // Global middleware
 app.use(cors());
 app.use(express.json());
+
 // Database Middleware
 app.use(async (req, res, next) => {
   try {
@@ -81,30 +82,7 @@ app.use('/api/categories', categoryroutes);
 app.use('/api/events', eventroutes);
 app.use('/api/registrations', registrationroutes);
 app.use('/api/messages', messageroutes);
-
-// Task 7: Health Endpoint (confirms the server + the state of the database)
-
-app.get('/health', async (req, res) => {
-  try {
-    // 1. Ensure DB connection promise is resolved
-    const db = await connectDB();
-    
-    // 2. Ping the database directly to confirm active connection
-    await db.connection.db.admin().ping();
-
-    return res.status(200).json({
-      status: 'ok',
-      message: 'server and database operational',
-      database: 'connected',
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: error.message,
-      database: 'disconnected',
-    });
-  }
-});
+app.use('/health', healthroutes);
 
 // Handle undefined routes
 app.all(/(.*)/, (req, res, next) => {
