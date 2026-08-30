@@ -5,6 +5,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
 
 const apperror = require('./utils/apperror');
+const connectDB = require('./config/db');
 const errormiddleware = require('./middleware/errorhandler');
 
 // Import routes
@@ -65,6 +66,15 @@ app.use(
 app.use(cors());
 app.use(express.json());
 
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 // API Routes
 app.use('/api/users', userroutes);
 app.use('/api/categories', categoryroutes);
@@ -73,7 +83,9 @@ app.use('/api/registrations', registrationroutes);
 app.use('/api/messages', messageroutes);
 
 // Task 7: Health Endpoint (confirms the server + the state of the database)
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  try {
+    await connectDB();
   const isdbconnected = mongoose.connection.readyState === 1;
 
   if (!isdbconnected) {
