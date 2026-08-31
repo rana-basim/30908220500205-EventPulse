@@ -16,11 +16,10 @@ const seeddatabase = async () => {
     let adminuser = existingadmin;
 
     if (!existingadmin) {
-      const hashedpassword = await bcrypt.hash('admin123', 10);
       adminuser = await user.create({
         name: 'system admin',
         email: 'admin@eventpulse.com',
-        password: hashedpassword,
+        password: 'admin123',
         role: 'admin',
       });
       console.log('admin user created');
@@ -45,6 +44,8 @@ const seeddatabase = async () => {
     console.log('categories seeded');
 
     const techcategory = await category.findOne({ name: 'tech' });
+    const musiccategory = await category.findOne({ name: 'music' });
+    const sportscategory = await category.findOne({ name: 'sports' });
 
     // 3. Seed Sample Event
     const sampleevent = {
@@ -54,8 +55,38 @@ const seeddatabase = async () => {
       city: 'cairo',
       capacity: 100,
       category: techcategory._id,
-      createdBy: adminuser._id,
+      createdby: adminuser._id,
     };
+
+    const sampleevent2 = {
+       title: "downtown cairo jazz night",
+       description: "live outdoor music festival featuring local jazz bands.",
+       date: new Date("2026-10-05"),
+       city: 'cairo',
+       capacity: 300,
+       category: musiccategory?._id,
+       createdby: adminuser?._id
+    };
+    //  Capacity is 0 to test what happens in a full registration
+    const sampleevent3 = {
+      title: "national tennis championship",
+      description: "tournament with prizes.",
+      date: new Date("2026-11-05"),
+      capacity: 0,
+      city: "alexandria",
+      category: sportscategory?._id,
+      createdby: adminuser?._id
+    }
+
+    const sampleevent4 = {
+      title: "banha marathon",
+      description: "10km fitness event",
+      date: new Date("2026-12-03"),
+      capacity: 50,
+      city: "banha",
+      category: sportscategory?._id,
+      createdby: adminuser?._id
+    }
 
     await event.findOneAndUpdate(
       { title: sampleevent.title },
@@ -63,6 +94,27 @@ const seeddatabase = async () => {
       { upsert: true, new: true }
     );
     console.log('sample event seeded');
+
+    await event.findOneAndUpdate(
+      { title: sampleevent2.title },
+      sampleevent2,
+      { upsert: true, new: true }
+    );
+    console.log('sample event 2 seeded');
+
+    await event.findOneAndUpdate(
+      { title: sampleevent3.title },
+      sampleevent3,
+      { upsert: true, new: true }
+    );
+    console.log('sample event 3 seeded');
+
+    await event.findOneAndUpdate(
+      { title: sampleevent4.title },
+      sampleevent4,
+      { upsert: true, new: true }
+    );
+    console.log('sample event 4 seeded');
 
     console.log('seeding completed successfully without duplication');
     process.exit(0);

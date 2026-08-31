@@ -41,6 +41,7 @@ const getevents = asynchandler(async (req, res, next) => {
   const events = await event
     .find(query)
     .populate('category')
+    .populate('createdby', 'name email role')
     .sort(sortoption)
     .skip(skip)
     .limit(limitnumber);
@@ -83,7 +84,7 @@ const updateevent = asynchandler(async (req, res, next) => {
 });
 
 const deleteevent = asynchandler(async (req, res, next) => {
-  const deletedevent = await event.findByIdandDelete(req.params.id);
+  const deletedevent = await event.findByIdAndDelete(req.params.id);
   if (!deletedevent) {
     return next(new apperror('event not found', 404));
   }

@@ -15,7 +15,7 @@ const categoryroutes = require('./routes/category');
 const eventroutes = require('./routes/event');
 const registrationroutes = require('./routes/registration');
 const messageroutes = require('./routes/message');
-const healthroutes = require('./routes/health'); // Ensure this import is declared
+const healthroutes = require('./routes/health');
 
 const app = express();
 
@@ -81,8 +81,9 @@ app.use('/api/users', userroutes);
 app.use('/api/categories', categoryroutes);
 app.use('/api/events', eventroutes);
 app.use('/api/registrations', registrationroutes);
-app.use('/api/messages', messageroutes);
+app.use('/api/announcements', messageroutes);
 app.use('/health', healthroutes);
+app.use('/api/events', messageroutes);
 
 // Handle undefined routes
 app.all(/(.*)/, (req, res, next) => {

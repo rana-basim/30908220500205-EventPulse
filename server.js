@@ -17,6 +17,8 @@ const io = new Server(server, {
   },
 });
 
+app.set('io', io);
+
 // Wire Socket.io event logic
 initsocket(io);
 

@@ -20,7 +20,7 @@ const createcategory = asynchandler(async (req, res, next) => {
 });
 
 const updatecategory = asynchandler(async (req, res, next) => {
-  const updatedcategory = await category.findbyidandupdate(
+  const updatedcategory = await category.findByIdAndUpdate(
     req.params.id,
     req.body,
     { new: true, runvalidators: true }
@@ -37,7 +37,7 @@ const updatecategory = asynchandler(async (req, res, next) => {
 });
 
 const deletecategory = asynchandler(async (req, res, next) => {
-  const deletedcategory = await category.findbyidanddelete(req.params.id);
+  const deletedcategory = await category.findByIdAndDelete(req.params.id);
   if (!deletedcategory) {
     return next(new apperror('category not found', 404));
   }

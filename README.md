@@ -1,5 +1,4 @@
-# I submitted the wrong vercel deployment link. The right one is: "https://30908220500205-event.vercel.app/". The link I sent you was wrong
-# 30908220500205-event
+# 30908220500205-EventPulse
  Backend API #
 
 ## TITLE AND DESCRIPTION
@@ -62,3 +61,30 @@ system
 http://localhost:5000/health ---> GET (Public)
 
 http://localhost:5000/api-docs ---> GET (Public Interactive Swagger UI)
+
+# Results of test
+
+ PASS  test/event.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (3) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+ PASS  test/user.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (3) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+ PASS  test/asynchandler.test.js
+ PASS  test/apperror.test.js
+
+Test Suites: 4 passed, 4 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        5.394 s
+Ran all test suites.

@@ -12,13 +12,11 @@ const register = asynchandler(async (req, res, next) => {
     return next(new apperror('email already registered', 400));
   }
 
-  const salt = await bcrypt.genSalt(10);
-  const hashedpassword = await bcrypt.hash(password, salt);
 
   const newuser = await user.create({
     name,
     email,
-    password: hashedpassword,
+    password,
     role: role === 'admin' ? 'admin' : 'attendee',
   });
 
