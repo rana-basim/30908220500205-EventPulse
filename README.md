@@ -1,6 +1,7 @@
 # 30908220500205-EventPulse
+## Vercel link
  Backend API #
-
+ My vercel link is https://30908220500205-event.vercel.app/
 ## TITLE AND DESCRIPTION
 This is an Event Management Backend API. You can manage user authentication (attendees and admins), create and filter events, handle event registrations with strict capacity limits, broadcast real-time announcements via Socket.io, view automated message history, and inspect interactive Swagger documentation. 
 
@@ -23,48 +24,24 @@ Student ID-EventPulse/
 ├── README.md           # Documentation
 ├── seed.js             # Database initialization script (runs separately)
 ├── server.js           # Main server entry point & Socket.io socket initialization
-└── vercel.json         # Deployment settings for Vercel cloud hosting
+└── vercel.json         # Deployment settings for Vercel cloud hosting```
+```
+## Technologies Used
 
-API ENDPOINTS
-users / auth
+* **Runtime Environment:** Node.js
+* **Framework:** Express.js
+* **Database:** MongoDB (via Mongoose ORM)
+* **Real-time WebSockets:** Socket.IO
+* **Authentication & Security:** JSON Web Tokens (JWT) & bcryptjs
+* **Environment Configuration:** dotenv
 
-http://localhost:5000/api/users/register ---> POST (Public)
+# npm install express mongoose socket.io dotenv bcryptjs jsonwebtoken express-validator swagger-ui-express swagger-jsdoc
 
-http://localhost:5000/api/users/login ---> POST (Public)
 
-events
+## Results of test
 
-http://localhost:5000/api/events ---> GET (Public) & POST (Admin)
-
-http://localhost:5000/api/events/:id ---> GET (Public) & PATCH (Admin) & DELETE (Admin)
-
-categories
-
-http://localhost:5000/api/categories ---> GET (Public) & POST (Admin)
-
-http://localhost:5000/api/categories/:id ---> PATCH (Admin) & DELETE (Admin)
-
-registrations
-
-http://localhost:5000/api/registrations ---> POST (Attendee)
-
-http://localhost:5000/api/registrations/my ---> GET (Attendee)
-
-http://localhost:5000/api/registrations/:id ---> DELETE (Attendee)
-
-messages
-
-http://localhost:5000/api/messages/event/:eventid ---> GET (Authenticated User)
-
-system
-
-http://localhost:5000/health ---> GET (Public)
-
-http://localhost:5000/api-docs ---> GET (Public Interactive Swagger UI)
-
-# Results of test
-
- PASS  test/event.test.js
+ ```
+PASS  test/event.test.js
   ● Console
 
     console.log
@@ -88,3 +65,20 @@ Tests:       10 passed, 10 total
 Snapshots:   0 total
 Time:        5.394 s
 Ran all test suites.
+```
+
+## Socket.IO Setup in Postman / Client
+Connection URL: ws://localhost:5000
+
+Join Event Room:
+
+Event Name: join_event
+
+Payload (String): "6a95ccd629a8f6604369ffb6" (Replace with your Event ID)
+
+Listen for Announcements:
+
+Event Name: announcement
+
+Emitted automatically whenever an admin broadcasts an announcement via the HTTP API.
+
